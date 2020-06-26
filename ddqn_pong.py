@@ -22,15 +22,15 @@ from keras import initializers
 # ███████ ███████ ██   ████ ███████ ██ ██████  ███████ ███████     ██      ██   ██ ██   ██ ██   ██ ██      ██ ███████    ██    ███████ ██   ██ ███████
 
 #agent
-# load_pre_trained_model = '4x8x3__140.00max__140.00avg__140.00min_0.98discount_0.99epsilondecay_1592587461.model'
-load_pre_trained_model = None
+load_pre_trained_model = '3x3_999episode__618.00max__513.10avg__105.00min_0.99discount_0.9999epsilondecay_1593110440.model'
+# load_pre_trained_model = None
 replay_memory_size = 50_000 #dimensione massima di mosse che possono essere tenute a mente
 sampling_memory = 64 #numenro di mosse usate per il training (sotto campione di replay_memory)
 discount = 0.99
 
 #game
 go_live = True
-episodes = 5000 #numero massimo di partite
+episodes = 1000 #numero massimo di partite
 sampling_epoc = 10 #ogni quante epoche registrare i risultati
 how_aften_go_live = 500 #ogni quante epoche fare il live di cosa succede
 how_aften_replace_target = 100 #ogni quanto caricare i pesi da modello live a modello target
@@ -40,7 +40,7 @@ model_name = '3x3'
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-epsilon_decay = 0.9999
+epsilon_decay = 0.99999
 min_epsilon = 0.1
 
 
