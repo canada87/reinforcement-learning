@@ -22,66 +22,62 @@ class element:
 
     def display(self, background):
         ball_pixels = np.zeros((self.w_size, self.w_size, 3), dtype=np.uint8)
-        ball_pixels[self.x - self.x_size : self.x + self.x_size, self.y - self.y_size : self.y + self.y_size] = self.color
-        background +=ball_pixels
+        ball_pixels[self.x - self.x_size: self.x + self.x_size, self.y - self.y_size: self.y + self.y_size] = self.color
+        background += ball_pixels
 
     def action(self, choice):
+        reward = 0
         if choice == 0:
-            self.move(y=1)
+            reward = self.move(y=self.y_size*2, x = 0)
         elif choice == 1:
-            self.move(y=-1)
+            reward = self.move(y=-self.y_size*2, x = 0)
         elif choice == 2:
-            self.move(y=0)
+            reward = self.move(x=self.x_size*2, y = 0)
+        elif choice == 3:
+            reward = self.move(x=self.x_size*2, y = 0)
+        return reward
 
-    def move(self, y):
+    def move(self, x, y):
+        reward = 0
         self.y += y
         if self.y > self.w_size - self.y_size:
             self.y = self.w_size - self.y_size
+            reward = -2
         if self.y < self.y_size:
             self.y = self.y_size
+            reward = -2
 
-    def update(self):
-        self.x += self.x_speed
-        self.y += self.y_speed
-
-    def win_lose(self):
-        lose_side = 0
+        self.x += x
         if self.x > self.w_size - self.x_size:
-            lose_side = 1
-            return True, lose_side
+            self.x = self.w_size - self.x_size
+            reward = -2
         if self.x < self.x_size:
-            lose_side = 2
-            return True, lose_side
-        return False, lose_side
+            self.x = self.x_size
+            reward = -2
+        return reward
 
-    def boundaries(self):
-        if self.y + self.y_size> self.w_size:
-            self.y = self.w_size - self.y_size
-            self.y_speed *= -1
+    def not_overimpose(self, other):
+        if self.x == other.x and self.y == other.y:
+            self.action(np.random.randint(0, 4))
 
-        if self.y < self.y_size:
-            self.y = self.y_size
-            self.y_speed *= -1
+    def is_overimpose(self, other):
+        if self.x == other.x and self.y == other.y:
+            return 1
+        else:
+            return 0
 
-    def hit(self, other):
-        is_hit = 0
-
-        if (np.abs(self.y - other.y) < other.y_size + self.y_size):
-            if (np.abs(other.x + other.x_size - self.x) < self.x_size):
-                if self.x - self.x_size < other.x + other.x_size - 3:
-                    self.x_speed = self.x_speed
-                else:
-                    self.x_speed *= -1
-                    is_hit = 1
-
-        if (np.abs(self.y - other.y) < other.y_size + self.y_size):
-            if (np.abs(other.x - other.x_size - self.x) < self.x_size):
-                if self.x + self.x_size > other.x - other.x_size + 3:
-                    self.x_speed = self.x_speed
-                else:
-                    self.x_speed *= -1
-                    is_hit = 2
-        return is_hit
+    def hit(self, branco, cavalletta, falco):
+        reward = -1
+        done = False
+        if self.x == branco.x and self.y == branco.y:
+            reward = 10
+            done = True
+        if self.x == cavalletta.x and self.y == cavalletta.y:
+            reward = 1
+        if self.x == falco.x and self.y == falco.y:
+            reward = -10
+            done = True
+        return reward, done
 
 
 # ███████ ███    ██ ██    ██ ██ ██████   ██████  ███    ██ ███    ███ ███████ ███    ██ ████████
@@ -95,63 +91,75 @@ class env:
 
     def __init__(self):
         self.size = 500
-        self.ball_size = 10
-        self.x_speed = 2
-        self.y_speed = 3
-
-        self.reward_lose_game = -300
-        self.reward_win_game = 300
-        self.reward_hit = 30
-        self.reward_still_alive = 1
-        self.reward_ball_on_eye = 2
+        self.num_square = 5
+        resto = self.size%self.num_square
+        self.size = self.size - resto
 
     def set_up(self):
-        self.ball = element(self.size//2, self.size//2, self.x_speed, self.y_speed, self.ball_size, self.ball_size, self.size, (255, 175, 0))
-        self.pad1 = element(25, self.size//2, 0, 0, 10, 50, self.size, (0, 255, 0))
-        self.pad2 = element(self.size-25, self.size//2, 0, 0, 10, 50, self.size, (0, 0, 255))
+        def random_start():
+            x_pos = self.size//(self.num_square * 2) + self.size//(self.num_square)*np.random.randint(0, self.num_square)
+            y_pos = self.size//(self.num_square * 2) + self.size//(self.num_square)*np.random.randint(0, self.num_square)
+            return x_pos, y_pos
 
-        observation = self.ball.y, self.pad1.x, self.pad2.y
-        return np.array(observation)
+        # x_pos, y_pos = random_start()
+        x_pos, y_pos = self.size//(self.num_square * 2), self.size//(self.num_square * 2)
+        self.lizard = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (255, 175, 0))#magenta
+
+        # x_pos, y_pos = random_start()
+        x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*4, self.size//(self.num_square * 2)+ self.size//(self.num_square)*4
+        self.branco = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (255, 0, 0))#blu
+
+        # x_pos, y_pos = random_start()
+        x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*0, self.size//(self.num_square * 2)+ self.size//(self.num_square)*4
+        self.cavalletta = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (0, 255, 0))#verde
+
+        # x_pos, y_pos = random_start()
+        x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*4, self.size//(self.num_square * 2)+ self.size//(self.num_square)*0
+        self.falco = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (0, 0, 255))#rosso
+
+        observation = self.lizard.x, self.lizard.y, self.branco.x, self.branco.y, self.cavalletta.x, self.cavalletta.y, self.falco.x, self.falco.y
+        return np.array(observation)/self.size
 
     def step(self, action):
-        self.pad1.action(action)
+        reward_wall = self.lizard.action(action)
 
-        self.pad2.y = self.ball.y
+        # #adversary movement
+        # self.cavalletta.action(np.random.randint(0, 4))
+        # self.branco.action(np.random.randint(0, 4))
+        # self.falco.action(np.random.randint(0, 4))
+        #
+        # done_over = False
+        # while not done_over:
+        #     count = 0
+        #     count += self.cavalletta.is_overimpose(self.branco)
+        #     count += self.cavalletta.is_overimpose(self.falco)
+        #     count += self.branco.is_overimpose(self.cavalletta)
+        #     count += self.branco.is_overimpose(self.falco)
+        #     count += self.falco.is_overimpose(self.cavalletta)
+        #     count += self.falco.is_overimpose(self.branco)
+        #     self.cavalletta.not_overimpose(self.branco)
+        #     self.cavalletta.not_overimpose(self.falco)
+        #     self.branco.not_overimpose(self.cavalletta)
+        #     self.branco.not_overimpose(self.falco)
+        #     self.falco.not_overimpose(self.cavalletta)
+        #     self.falco.not_overimpose(self.branco)
+        #     if count == 0:
+        #         done_over = True
+        #     else:
+        #         done_over = False
 
-        self.pad1.boundaries()
-        self.pad2.boundaries()
-        self.ball.boundaries()
-
-        is_hit = self.ball.hit(self.pad1)
-        self.ball.hit(self.pad2)
-
-        self.ball.update()
-
-        done, lose_side = self.ball.win_lose()
-        observation = self.ball.y, self.pad1.x, self.pad2.y
-
-        reward = self.reward_still_alive
-
-        if self.ball.y < self.pad1.y + self.pad1.y_size and self.ball.y > self.pad1.y - self.pad1.y_size:
-            reward = self.reward_ball_on_eye
-
-        if is_hit == 1:
-            reward = self.reward_hit
-
-        if done:
-            if lose_side == 2:
-                reward = self.reward_lose_game
-            if lose_side == 1:
-                reward = self.reward_win_game
-
-        return np.array(observation), reward, done
+        observation = self.lizard.x, self.lizard.y, self.branco.x, self.branco.y, self.cavalletta.x, self.cavalletta.y, self.falco.x, self.falco.y
+        reward, done = self.lizard.hit(self.branco, self.cavalletta, self.falco)
+        reward += reward_wall
+        return np.array(observation)/self.size, reward, done
 
     def render(self):
         screen = np.zeros((self.size, self.size, 3), dtype=np.uint8)
-        self.ball.display(screen)
-        self.pad1.display(screen)
-        self.pad2.display(screen)
+        self.lizard.display(screen)
+        self.falco.display(screen)
+        self.branco.display(screen)
+        self.cavalletta.display(screen)
 
         img = Image.fromarray(screen, 'RGB')
         cv2.imshow("image", np.array(img))
-        cv2.waitKey(10)
+        cv2.waitKey(500)

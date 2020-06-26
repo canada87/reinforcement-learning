@@ -1,16 +1,5 @@
-from PIL import Image
-import cv2
-import numpy as np
-import random
 from tqdm import tqdm
-from collections import deque
 import matplotlib.pyplot as plt
-import time
-
-from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout
-from keras.optimizers import Adam
-from keras import initializers
 
 from AJ_lib_environment import env
 from AJ_lib_agent import Agent
@@ -22,7 +11,7 @@ from AJ_lib_agent import Agent
 #      ██ ██      ██  ██ ██      ██ ██ ██   ██ ██      ██          ██      ██   ██ ██   ██ ██   ██ ██  ██  ██ ██         ██    ██      ██   ██      ██
 # ███████ ███████ ██   ████ ███████ ██ ██████  ███████ ███████     ██      ██   ██ ██   ██ ██   ██ ██      ██ ███████    ██    ███████ ██   ██ ███████
 
-#agent
+# agent
 # load_pre_trained_model = '3x3_999episode__618.00max__513.10avg__105.00min_0.99discount_0.9999epsilondecay_1593110440.model'
 load_pre_trained_model = None
 replay_memory_size = 50_000 #dimensione massima di mosse che possono essere tenute a mente
@@ -51,10 +40,9 @@ min_epsilon = 0.1
 # ██  ██  ██ ██   ██ ██ ██  ██ ██
 # ██      ██ ██   ██ ██ ██   ████
 
-
-agent = Agent(action_space = 3, observation_space = 3, replay_memory_size = replay_memory_size, epsilon = epsilon,
-                   min_epsilon = min_epsilon, epsilon_decay = epsilon_decay, discount = discount, sampling_memory = sampling_memory,
-                   load_pre_trained_model = load_pre_trained_model)
+agent = Agent(action_space=3, observation_space=3, replay_memory_size=replay_memory_size, epsilon=epsilon,
+                   min_epsilon=min_epsilon, epsilon_decay=epsilon_decay, discount=discount, sampling_memory=sampling_memory,
+                   load_pre_trained_model=load_pre_trained_model)
 
 environment = env()
 pbar = tqdm(range(1, episodes+1), ascii = True, unit='episode')
@@ -76,7 +64,7 @@ for episode in pbar:
         agent.update_replay_memory((observation, action, reward, next_observation, done))
         observation = next_observation
 
-        agent.DDQN_train(episode = episode, how_aften_train = how_aften_train, how_aften_replace_target = how_aften_replace_target)
+        agent.DDQN_train(episode=episode, how_aften_train=how_aften_train, how_aften_replace_target=how_aften_replace_target)
 
         if go_live and not episode % how_aften_go_live:
             environment.render()
@@ -87,8 +75,8 @@ for episode in pbar:
 
     agent.save_model(episode_reward, episode, episodes, sampling_epoc, min_reward_bar, model_name)
 
-plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['avg'], label = 'avg')
-plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['min'], label = 'min')
-plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['max'], label = 'max')
-plt.legend(loc = 4)
+plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['avg'], label='avg')
+plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['min'], label='min')
+plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['max'], label='max')
+plt.legend(loc=4)
 plt.show()

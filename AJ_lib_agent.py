@@ -5,7 +5,7 @@ import time
 
 
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
 from keras import initializers
 
@@ -21,8 +21,8 @@ class Agent:
 
         self.load_pre_trained_model = load_pre_trained_model
 
-        self.action_space = 3
-        self.observation_space = 3
+        self.action_space = action_space
+        self.observation_space = observation_space
 
         self.live_model = self.create_model()
         self.target_model = self.create_model()
@@ -62,7 +62,7 @@ class Agent:
             action_predict = self.live_model.predict(observation)
 
             next_observation = np.array([frame[3] for frame in minibatch])
-            next_action_predict_live = self.live_model.predict(next_observation)
+            # next_action_predict_live = self.live_model.predict(next_observation)
             next_action_predict = self.target_model.predict(next_observation)
 
             x = []
@@ -82,7 +82,6 @@ class Agent:
                 x.append(observation)
                 y.append(current_predicted_action)
 
-            # self.live_model.fit(np.array(x), np.array(y), batch_size = sampling_memory, verbose = 0, shuffle=False)
             self.live_model.fit(np.array(x), np.array(y), verbose = 0, shuffle=False)
 
             if episode % how_aften_replace_target == 0:
@@ -125,9 +124,8 @@ class Agent:
             self.epsilon = max(self.min_epsilon, self.epsilon)
 
         return action
-        # return  np.argmax(self.live_model.predict(np.array(observation).reshape(-1, *observation.shape))[0])
 
-    def save_model(self, episode_reward, episode, episodes, sampling_epoc, min_reward_bar, model_name):
+    def save_model(self, episode_reward, episode, episodes, sampling_epoc, min_reward_bar, model_name, save_enable = True):
         self.ep_rewards.append(episode_reward)
 
         if not episode % sampling_epoc or episode == 1 or episode == episodes - 1:
@@ -141,5 +139,5 @@ class Agent:
             self.aggr_ep_rewards['max'].append(max_reward)
 
             # Save model, but only when min reward is greater or equal a set value
-            if average_reward >= min_reward_bar or episode == episodes - 1:
-                agent.live_model.save(f'models/{model_name}_{episode}episode_{max_reward}max_{average_reward}avg_{min_reward}min_{self.discount}discount_{self.epsilon_decay}epsilondecay_{int(time.time())}.model')
+            if save_enable and (average_reward >= min_reward_bar or episode == episodes - 1):
+                self.live_model.save(f'models/{model_name}_{episode}episode_{max_reward}max_{average_reward}avg_{min_reward}min_{self.discount}discount_{self.epsilon_decay}epsilondecay_{int(time.time())}.model')

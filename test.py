@@ -1,8 +1,9 @@
-import numpy as np
+array = [5,7,8,9,12,-5]
+for el in array:
 
-vettore = [i for i in range(40,60)]
+    number = 5
+    if el > int(number):
 
-indices = np.random.choice(range(20), size=5)
-
-state_sample = np.array([vettore[i] for i in indices])
-print(state_sample)
+        print(el)
+    else:
+        print(el-el)

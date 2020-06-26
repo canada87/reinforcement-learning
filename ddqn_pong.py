@@ -9,7 +9,7 @@ import time
 
 
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
 from keras import initializers
 
@@ -323,7 +323,7 @@ class pong_agent:
             action_predict = self.live_model.predict(observation)
 
             next_observation = np.array([frame[3] for frame in minibatch])
-            next_action_predict_live = self.live_model.predict(next_observation)
+            # next_action_predict_live = self.live_model.predict(next_observation)
             next_action_predict = self.target_model.predict(next_observation)
 
             x = []
@@ -397,7 +397,7 @@ class pong_agent:
 
             # Save model, but only when min reward is greater or equal a set value
             if average_reward >= min_reward_bar or episode == episodes - 1:
-                agent.live_model.save(f'models/{model_name}_{episode}episode_{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min_{self.discount}discount_{self.epsilon_decay}epsilondecay_{int(time.time())}.model')
+                self.live_model.save(f'models/{model_name}_{episode}episode_{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min_{self.discount}discount_{self.epsilon_decay}epsilondecay_{int(time.time())}.model')
 
 # ███    ███  █████  ██ ███    ██
 # ████  ████ ██   ██ ██ ████   ██
