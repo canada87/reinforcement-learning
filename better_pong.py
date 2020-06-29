@@ -5,11 +5,6 @@ import numpy as np
 # from keras.optimizers import Adam
 # from keras.callbacks import TensorBoard
 # import tensorflow as tf
-from collections import deque
-import time
-import random
-from tqdm import tqdm
-import os
 from PIL import Image
 import cv2
 

@@ -96,22 +96,23 @@ class env:
     def __init__(self):
         self.size = 500
         self.ball_size = 10
-        self.x_speed = 2
-        self.y_speed = 3
+        self.x_speed = 4
+        self.y_speed = 6
 
-        self.reward_lose_game = -300
-        self.reward_win_game = 300
-        self.reward_hit = 30
-        self.reward_still_alive = 1
-        self.reward_ball_on_eye = 2
+        self.reward_lose_game = -100
+        self.reward_win_game = 100
+        self.reward_hit = 5
+        self.reward_still_alive = -1
+        self.reward_ball_on_eye = 1
 
     def set_up(self):
         self.ball = element(self.size//2, self.size//2, self.x_speed, self.y_speed, self.ball_size, self.ball_size, self.size, (255, 175, 0))
         self.pad1 = element(25, self.size//2, 0, 0, 10, 50, self.size, (0, 255, 0))
+        # self.pad1 = element(25, 273, 0, 0, 10, 50, self.size, (0, 255, 0))
         self.pad2 = element(self.size-25, self.size//2, 0, 0, 10, 50, self.size, (0, 0, 255))
 
         observation = self.ball.y, self.pad1.x, self.pad2.y
-        return np.array(observation)
+        return np.array(observation)/self.size
 
     def step(self, action):
         self.pad1.action(action)
@@ -144,7 +145,7 @@ class env:
             if lose_side == 1:
                 reward = self.reward_win_game
 
-        return np.array(observation), reward, done
+        return np.array(observation)/self.size, reward, done
 
     def render(self):
         screen = np.zeros((self.size, self.size, 3), dtype=np.uint8)

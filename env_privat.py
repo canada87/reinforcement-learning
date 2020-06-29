@@ -4,7 +4,6 @@ import cv2  # for showing our visual live
 import matplotlib.pyplot as plt  # for graphing our mean rewards over time
 import pickle  # to save/load Q-Tables
 from matplotlib import style  # to make pretty charts because it matters.
-import time  # using this to keep track of our saved Q-Tables.
 
 style.use("ggplot")  # setting our style!
 
@@ -154,6 +153,3 @@ plt.plot([i for i in range(len(moving_avg))], moving_avg)
 plt.ylabel(f'reward {SHOW_EVERY}ma')
 plt.xlabel('episode #')
 plt.show()
-#
-# with open(f"qtable-{int(time.time())}.pickle", "wb") as f:
-#     pickle.dump(q_table, f)

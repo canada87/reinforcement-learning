@@ -7,9 +7,8 @@ from collections import deque
 import matplotlib.pyplot as plt
 import time
 
-import keras.backend.tensorflow_backend as backend
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
+from keras.layers import Dense
 
 
 # ███████ ███████ ███    ██ ███████ ██ ██████  ██      ███████     ██████   █████  ██████   █████  ███    ███ ███████ ████████ ███████ ██████  ███████

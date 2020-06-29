@@ -1,6 +1,7 @@
 from PIL import Image
 import cv2
 import numpy as np
+import random
 
 
 #  ██████   ██████   ██████  ███████ ████████ ████████ ██
@@ -94,27 +95,57 @@ class env:
         self.num_square = 5
         resto = self.size%self.num_square
         self.size = self.size - resto
+        self.fixed_initial_pos = True
+        self.active_adversary_movents = False
 
     def set_up(self):
-        def random_start():
-            x_pos = self.size//(self.num_square * 2) + self.size//(self.num_square)*np.random.randint(0, self.num_square)
-            y_pos = self.size//(self.num_square * 2) + self.size//(self.num_square)*np.random.randint(0, self.num_square)
+        def random_start(x_poses, y_poses):
+            x_pos = random.choice(x_poses)
+            y_pos = random.choice(y_poses)
+            ix = x_poses.index(x_pos)
+            iy = y_poses.index(y_pos)
+            x_poses.pop(ix)
+            y_poses.pop(iy)
             return x_pos, y_pos
 
-        # x_pos, y_pos = random_start()
-        x_pos, y_pos = self.size//(self.num_square * 2), self.size//(self.num_square * 2)
+        x_poses =  [i for i in range(self.num_square)]
+        y_poses =  [i for i in range(self.num_square)]
+
+        if self.fixed_initial_pos:
+            x_pos, y_pos = self.size//(self.num_square * 2), self.size//(self.num_square * 2)
+        else:
+            # x_pos, y_pos = 0,0
+            # ix = x_poses.index(x_pos)
+            # iy = y_poses.index(y_pos)
+            # x_poses.pop(ix)
+            # y_poses.pop(iy)
+            x_pos, y_pos = random_start(x_poses, y_poses)
+            x_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*x_pos
+            y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*y_pos
         self.lizard = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (255, 175, 0))#magenta
 
-        # x_pos, y_pos = random_start()
-        x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*4, self.size//(self.num_square * 2)+ self.size//(self.num_square)*4
+        if self.fixed_initial_pos:
+            x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*4, self.size//(self.num_square * 2)+ self.size//(self.num_square)*4
+        else:
+            x_pos, y_pos = random_start(x_poses, y_poses)
+            x_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*x_pos
+            y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*y_pos
         self.branco = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (255, 0, 0))#blu
 
-        # x_pos, y_pos = random_start()
-        x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*0, self.size//(self.num_square * 2)+ self.size//(self.num_square)*4
+        if self.fixed_initial_pos:
+            x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*0, self.size//(self.num_square * 2)+ self.size//(self.num_square)*2
+        else:
+            x_pos, y_pos = random_start(x_poses, y_poses)
+            x_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*x_pos
+            y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*y_pos
         self.cavalletta = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (0, 255, 0))#verde
 
-        # x_pos, y_pos = random_start()
-        x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*4, self.size//(self.num_square * 2)+ self.size//(self.num_square)*0
+        if self.fixed_initial_pos:
+            x_pos, y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*2, self.size//(self.num_square * 2)+ self.size//(self.num_square)*2
+        else:
+            x_pos, y_pos = random_start(x_poses, y_poses)
+            x_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*x_pos
+            y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*y_pos
         self.falco = element(x_pos, y_pos, 0, 0, self.size//(self.num_square * 2), self.size//(self.num_square * 2), self.size, (0, 0, 255))#rosso
 
         observation = self.lizard.x, self.lizard.y, self.branco.x, self.branco.y, self.cavalletta.x, self.cavalletta.y, self.falco.x, self.falco.y
@@ -124,29 +155,30 @@ class env:
         reward_wall = self.lizard.action(action)
 
         # #adversary movement
-        # self.cavalletta.action(np.random.randint(0, 4))
-        # self.branco.action(np.random.randint(0, 4))
-        # self.falco.action(np.random.randint(0, 4))
-        #
-        # done_over = False
-        # while not done_over:
-        #     count = 0
-        #     count += self.cavalletta.is_overimpose(self.branco)
-        #     count += self.cavalletta.is_overimpose(self.falco)
-        #     count += self.branco.is_overimpose(self.cavalletta)
-        #     count += self.branco.is_overimpose(self.falco)
-        #     count += self.falco.is_overimpose(self.cavalletta)
-        #     count += self.falco.is_overimpose(self.branco)
-        #     self.cavalletta.not_overimpose(self.branco)
-        #     self.cavalletta.not_overimpose(self.falco)
-        #     self.branco.not_overimpose(self.cavalletta)
-        #     self.branco.not_overimpose(self.falco)
-        #     self.falco.not_overimpose(self.cavalletta)
-        #     self.falco.not_overimpose(self.branco)
-        #     if count == 0:
-        #         done_over = True
-        #     else:
-        #         done_over = False
+        if self.active_adversary_movents:
+            self.cavalletta.action(np.random.randint(0, 4))
+            self.branco.action(np.random.randint(0, 4))
+            self.falco.action(np.random.randint(0, 4))
+
+            done_over = False
+            while not done_over:
+                count = 0
+                count += self.cavalletta.is_overimpose(self.branco)
+                count += self.cavalletta.is_overimpose(self.falco)
+                count += self.branco.is_overimpose(self.cavalletta)
+                count += self.branco.is_overimpose(self.falco)
+                count += self.falco.is_overimpose(self.cavalletta)
+                count += self.falco.is_overimpose(self.branco)
+                self.cavalletta.not_overimpose(self.branco)
+                self.cavalletta.not_overimpose(self.falco)
+                self.branco.not_overimpose(self.cavalletta)
+                self.branco.not_overimpose(self.falco)
+                self.falco.not_overimpose(self.cavalletta)
+                self.falco.not_overimpose(self.branco)
+                if count == 0:
+                    done_over = True
+                else:
+                    done_over = False
 
         observation = self.lizard.x, self.lizard.y, self.branco.x, self.branco.y, self.cavalletta.x, self.cavalletta.y, self.falco.x, self.falco.y
         reward, done = self.lizard.hit(self.branco, self.cavalletta, self.falco)
