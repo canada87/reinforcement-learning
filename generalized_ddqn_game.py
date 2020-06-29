@@ -21,7 +21,7 @@ discount = 0.99
 #game
 go_live = True
 save_model = False
-episodes = 10_000 #numero massimo di partite
+episodes = 5000 #numero massimo di partite
 sampling_epoc = 100 #ogni quante epoche registrare i risultati
 how_aften_go_live = 5000 #ogni quante epoche fare il live di cosa succede
 how_aften_replace_target = 50 #ogni quanto caricare i pesi da modello live a modello target

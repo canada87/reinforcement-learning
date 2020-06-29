@@ -111,7 +111,7 @@ class env:
         # self.pad1 = element(25, 273, 0, 0, 10, 50, self.size, (0, 255, 0))
         self.pad2 = element(self.size-25, self.size//2, 0, 0, 10, 50, self.size, (0, 0, 255))
 
-        observation = self.ball.y, self.pad1.x, self.pad2.y
+        observation = self.ball.y, self.ball.x, self.pad1.y
         return np.array(observation)/self.size
 
     def step(self, action):
@@ -129,7 +129,7 @@ class env:
         self.ball.update()
 
         done, lose_side = self.ball.win_lose()
-        observation = self.ball.y, self.pad1.x, self.pad2.y
+        observation = self.ball.y, self.ball.x, self.pad1.y
 
         reward = self.reward_still_alive
 
