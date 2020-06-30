@@ -34,6 +34,7 @@ class Agent:
         self.live_model = self.create_model()
         self.target_model = self.create_model()
         self.target_model.set_weights(self.live_model.get_weights())
+        self.learning_rate = 0.001
 
         self.replay_memory = deque(maxlen = replay_memory_size)
 
@@ -65,7 +66,7 @@ class Agent:
             model = Sequential()
             model.add(Dense(64, activation = 'linear', input_dim =  self.observation_space))
             model.add(Dense(self.action_space, activation = 'linear'))
-            model.compile(loss='mse', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+            model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate), metrics=['accuracy'])
         return model
 
     def update_replay_memory(self, frame):
