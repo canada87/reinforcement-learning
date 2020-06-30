@@ -21,10 +21,10 @@ discount = 0.99
 #game
 go_live = True
 save_model = False
-episodes = 5000 #numero massimo di partite
+episodes = 10_000 #numero massimo di partite
 sampling_epoc = 100 #ogni quante epoche registrare i risultati
 how_aften_go_live = 5000 #ogni quante epoche fare il live di cosa succede
-how_aften_replace_target = 50 #ogni quanto caricare i pesi da modello live a modello target
+how_aften_replace_target = 50 #ogni quanti episodi caricare i pesi da modello live a modello target
 how_aften_train = 4
 min_reward_bar = 1500#valore minimo di reward per salvare i pesi del modello
 model_name = 'pong_motion_8x64x4'
@@ -44,7 +44,6 @@ min_epsilon = 0.05
 agent = Agent(action_space=3, observation_space=3, replay_memory_size=replay_memory_size, epsilon=epsilon,
                    min_epsilon=min_epsilon, epsilon_decay=epsilon_decay, discount=discount, sampling_memory=sampling_memory,
                    load_pre_trained_model=load_pre_trained_model)
-agent.second_type_of_brain = False
 agent.motion_recognition = True
 
 environment = env()
