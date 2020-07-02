@@ -1,7 +1,7 @@
 opencv-python==4.2.0.34
 numpy==1.18.2
 Pillow==7.1.2
-mkl-random==1.1.0
+mkl-random==1.0.1
 sortedcollections==1.2.1
 cftime==1.1.2
 Keras==2.3.1
