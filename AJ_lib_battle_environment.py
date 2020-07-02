@@ -154,12 +154,15 @@ class env:
 
         return np.array(observation)/self.size, reward1, reward2, done
 
-    def render(self):
+    def render(self, image_empty):
         screen = np.zeros((self.size, self.size, 3), dtype=np.uint8)
         self.ball.display(screen)
         self.pad1.display(screen)
         self.pad2.display(screen)
 
         img = Image.fromarray(screen, 'RGB')
-        cv2.imshow("image", np.array(img))
+        if image_empty is not None:
+            image_empty.image(img)
+        else:
+            cv2.imshow("image", np.array(img))
         cv2.waitKey(10)

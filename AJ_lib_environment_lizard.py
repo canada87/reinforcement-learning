@@ -35,7 +35,7 @@ class element:
         elif choice == 2:
             reward = self.move(x=self.x_size*2, y = 0)
         elif choice == 3:
-            reward = self.move(x=self.x_size*2, y = 0)
+            reward = self.move(x=-self.x_size*2, y = 0)
         return reward
 
     def move(self, x, y):
@@ -114,11 +114,6 @@ class env_lizard:
         if self.fixed_initial_pos:
             x_pos, y_pos = self.size//(self.num_square * 2), self.size//(self.num_square * 2)
         else:
-            # x_pos, y_pos = 0,0
-            # ix = x_poses.index(x_pos)
-            # iy = y_poses.index(y_pos)
-            # x_poses.pop(ix)
-            # y_poses.pop(iy)
             x_pos, y_pos = random_start(x_poses, y_poses)
             x_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*x_pos
             y_pos = self.size//(self.num_square * 2)+ self.size//(self.num_square)*y_pos
@@ -157,7 +152,7 @@ class env_lizard:
         # #adversary movement
         if self.active_adversary_movents:
             self.cavalletta.action(np.random.randint(0, 4))
-            self.branco.action(np.random.randint(0, 4))
+            # self.branco.action(np.random.randint(0, 4))
             self.falco.action(np.random.randint(0, 4))
 
             done_over = False
@@ -185,7 +180,7 @@ class env_lizard:
         reward += reward_wall
         return np.array(observation)/self.size, reward, done
 
-    def render(self):
+    def render(self, image_empty):
         screen = np.zeros((self.size, self.size, 3), dtype=np.uint8)
         self.lizard.display(screen)
         self.falco.display(screen)
@@ -193,5 +188,8 @@ class env_lizard:
         self.cavalletta.display(screen)
 
         img = Image.fromarray(screen, 'RGB')
-        cv2.imshow("image", np.array(img))
+        if image_empty is not None:
+            image_empty.image(img)
+        else:
+            cv2.imshow("image", np.array(img))
         cv2.waitKey(500)

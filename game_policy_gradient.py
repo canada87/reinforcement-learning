@@ -5,6 +5,7 @@ from AJ_lib_environment_pong import env_pong
 from AJ_lib_environment_lizard import env_lizard
 from AJ_lib_agent import Agent_policy_gradient_vanilla
 
+import streamlit as st
 
 # ███████ ███████ ███    ██ ███████ ██ ██████  ██      ███████     ██████   █████  ██████   █████  ███    ███ ███████ ████████ ███████ ██████  ███████
 # ██      ██      ████   ██ ██      ██ ██   ██ ██      ██          ██   ██ ██   ██ ██   ██ ██   ██ ████  ████ ██         ██    ██      ██   ██ ██
@@ -13,15 +14,16 @@ from AJ_lib_agent import Agent_policy_gradient_vanilla
 # ███████ ███████ ██   ████ ███████ ██ ██████  ███████ ███████     ██      ██   ██ ██   ██ ██   ██ ██      ██ ███████    ██    ███████ ██   ██ ███████
 
 game = 2 #1 lizard 2 pong
+stream = False
 
 #game
 # load_pre_trained_model = 'policy_lizard_policy_8x64x4_5000episode_12max_-3.94avg_-28min_0.99epsilondecay_1593613615.h5'
 load_pre_trained_model = None
 
-go_live = False
+go_live = True
 save_model = True
-episodes = 5000 #numero massimo di partite
-how_aften_go_live = 10 #ogni quante epoche fare il live di cosa succede
+episodes = 1 #numero massimo di partite
+how_aften_go_live = 1 #ogni quante epoche fare il live di cosa succede
 sampling_epoc = 100 #ogni quante epoche registrare i risultati
 min_reward_bar = 1500#valore minimo di reward per salvare i pesi del modello
 model_name = 'lizard_policy_8x64x4'
@@ -36,52 +38,57 @@ epsilon_decay = 0.99
 # ██  ██  ██ ██   ██ ██ ██  ██ ██
 # ██      ██ ██   ██ ██ ██   ████
 
-num_action = 3 if game == 2 else 4
-num_observation = 3 if game == 2 else 8
+go = st.button('go') if stream else True
 
-agent = Agent_policy_gradient_vanilla(action_space=num_action, observation_space=num_observation,
-                                      epsilon_decay=epsilon_decay, load_pre_trained_model=load_pre_trained_model)
+if go:
+    num_action = 3 if game == 2 else 4
+    num_observation = 3 if game == 2 else 8
 
-if game == 1:
-    environment = env_lizard()
-    environment.fixed_initial_pos = True
-    environment.active_adversary_movents = True
-else:
-    environment = env_pong()
+    agent = Agent_policy_gradient_vanilla(action_space=num_action, observation_space=num_observation,
+                                          epsilon_decay=epsilon_decay, load_pre_trained_model=load_pre_trained_model)
 
-pbar = tqdm(range(1, episodes+1), ascii = True, unit='episode')
-for episode in pbar:
-    episode_reward = 0
+    if game == 1:
+        environment = env_lizard()
+        environment.fixed_initial_pos = True
+        environment.active_adversary_movents = True
+    else:
+        environment = env_pong()
 
-    observation = environment.set_up()
-    done = False
-    durata = 0
-    ##############################################################################################
-    while not done:
-        action, prob = agent.decide_the_next_action(observation)
+    image_empty = st.empty() if stream else None
 
-        next_observation, reward, done = environment.step(action)
-        if durata >= 100:
-            done = True
-            reward = -10
+    pbar = tqdm(range(1, episodes+1), ascii = True, unit='episode')
+    for episode in pbar:
+        episode_reward = 0
 
-        episode_reward += reward
+        observation = environment.set_up()
+        done = False
+        durata = 0
+        ##############################################################################################
+        while not done:
+            action, prob = agent.decide_the_next_action(observation)
 
-        agent.update_replay_memory((observation, action, reward, prob))
-        observation = next_observation
+            next_observation, reward, done = environment.step(action)
+            if durata >= 100 and game == 1:
+                done = True
+                reward = -10
 
-        if go_live and not episode % how_aften_go_live:
-            environment.render()
-        durata += 1
-    ##############################################################################################
+            episode_reward += reward
 
-    agent.training()
+            agent.update_replay_memory((observation, action, reward, prob))
+            observation = next_observation
 
-    agent.save_model(episode_reward, episode, episodes, sampling_epoc, min_reward_bar, model_name, save_model)
-    pbar.set_description(f'epsilon {round(agent.epsilon_decay,3)} reward {agent.aggr_ep_rewards["avg"][-1]} durata {durata}')
+            if go_live and not episode % how_aften_go_live:
+                environment.render(image_empty)
+            durata += 1
+        ##############################################################################################
 
-plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['avg'], label='avg')
-plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['min'], label='min')
-plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['max'], label='max')
-plt.legend(loc=4)
-plt.show()
+        agent.training()
+
+        agent.save_model(episode_reward, episode, episodes, sampling_epoc, min_reward_bar, model_name, save_model)
+        pbar.set_description(f'epsilon {round(agent.epsilon_decay,3)} reward {agent.aggr_ep_rewards["avg"][-1]} durata {durata}')
+
+    plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['avg'], label='avg')
+    plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['min'], label='min')
+    plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['max'], label='max')
+    plt.legend(loc=4)
+    st.pyplot() if stream else plt.show()
