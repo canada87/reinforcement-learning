@@ -1,8 +1,9 @@
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from lizard_env import env
-from AJ_lib_agent import Agent
+from AJ_lib_environment_pong import env_pong
+from AJ_lib_environment_lizard import env_lizard
+from AJ_lib_agent import Agent_policy_gradient_pro
 
 
 # ███████ ███████ ███    ██ ███████ ██ ██████  ██      ███████     ██████   █████  ██████   █████  ███    ███ ███████ ████████ ███████ ██████  ███████
@@ -11,28 +12,25 @@ from AJ_lib_agent import Agent
 #      ██ ██      ██  ██ ██      ██ ██ ██   ██ ██      ██          ██      ██   ██ ██   ██ ██   ██ ██  ██  ██ ██         ██    ██      ██   ██      ██
 # ███████ ███████ ██   ████ ███████ ██ ██████  ███████ ███████     ██      ██   ██ ██   ██ ██   ██ ██      ██ ███████    ██    ███████ ██   ██ ███████
 
-# agent
-# load_pre_trained_model = 'lizard_2x4_9999episode_11max_-41.54avg_-304min_0.99discount_0.99999epsilondecay_1593186815.model'
-load_pre_trained_model = None
-replay_memory_size = 50_000 #dimensione massima di mosse che possono essere tenute a mente
-sampling_memory = 64 #numenro di mosse usate per il training (sotto campione di replay_memory)
-discount = 0.99
+game = 2 #1 lizard 2 pong
 
 #game
-go_live = True
+# load_pre_trained_prediction = 'predict_lizard_policy_8x64x4_5000episode_12max_-3.94avg_-28min_0.99epsilondecay_1593613615.h5'
+# load_pre_trained_policy = 'policy_lizard_policy_8x64x4_5000episode_12max_-3.94avg_-28min_0.99epsilondecay_1593613615.h5'
+
+load_pre_trained_prediction = None
+load_pre_trained_policy = None
+
+go_live = False
 save_model = True
-episodes = 10_000 #numero massimo di partite
+episodes = 5000 #numero massimo di partite
+how_aften_go_live = 10 #ogni quante epoche fare il live di cosa succede
 sampling_epoc = 100 #ogni quante epoche registrare i risultati
-how_aften_go_live = episodes #ogni quante epoche fare il live di cosa succede
-how_aften_replace_target = 50 #ogni quanto caricare i pesi da modello live a modello target
-how_aften_train = 4
-min_reward_bar = 5#valore minimo di reward per salvare i pesi del modello
-model_name = 'lizard_fixed_8x64x4'
+min_reward_bar = 1500#valore minimo di reward per salvare i pesi del modello
+model_name = 'lizard_policy_8x64x4'
 
 # Exploration settings
-epsilon = 1  # not a constant, going to be decayed
-epsilon_decay = 0.99999
-min_epsilon = 0.05
+epsilon_decay = 0.99
 
 
 # ███    ███  █████  ██ ███    ██
@@ -41,14 +39,18 @@ min_epsilon = 0.05
 # ██  ██  ██ ██   ██ ██ ██  ██ ██
 # ██      ██ ██   ██ ██ ██   ████
 
-agent = Agent(observation_space=8, action_space=4, replay_memory_size=replay_memory_size, epsilon=epsilon,
-                   min_epsilon=min_epsilon, epsilon_decay=epsilon_decay, discount=discount, sampling_memory=sampling_memory,
-                   load_pre_trained_model=load_pre_trained_model)
-agent.second_type_of_brain = True
+num_action = 3 if game == 2 else 4
+num_observation = 3 if game == 2 else 8
 
-environment = env()
-environment.fixed_initial_pos = True
-environment.active_adversary_movents = True
+agent = Agent_policy_gradient_pro(action_space=num_action, observation_space=num_observation, epsilon_decay=epsilon_decay,
+                              load_pre_trained_policy=load_pre_trained_policy, load_pre_trained_prediction=load_pre_trained_prediction)
+
+if game == 1:
+    environment = env_lizard()
+    environment.fixed_initial_pos = True
+    environment.active_adversary_movents = True
+else:
+    environment = env_pong()
 
 pbar = tqdm(range(1, episodes+1), ascii = True, unit='episode')
 for episode in pbar:
@@ -60,7 +62,6 @@ for episode in pbar:
     ##############################################################################################
     while not done:
         action = agent.decide_the_next_action(observation)
-        agent.update_epsilon()
 
         next_observation, reward, done = environment.step(action)
         if durata >= 100:
@@ -69,20 +70,18 @@ for episode in pbar:
 
         episode_reward += reward
 
-        agent.update_replay_memory((observation, action, reward, next_observation, done))
+        agent.update_replay_memory((observation, action, reward))
         observation = next_observation
 
-        agent.DDQN_train(episode=episode, how_aften_train=how_aften_train, how_aften_replace_target=how_aften_replace_target)
-        # agent.DQN_train(episode=episode, how_aften_train=how_aften_train)
-
         if go_live and not episode % how_aften_go_live:
-            # print('action', action, 'reward', reward)
             environment.render()
         durata += 1
     ##############################################################################################
 
+    agent.training()
+
     agent.save_model(episode_reward, episode, episodes, sampling_epoc, min_reward_bar, model_name, save_model)
-    pbar.set_description(f'epsilon {round(agent.epsilon,3)} reward {agent.aggr_ep_rewards["avg"][-1]} durata {durata}')
+    pbar.set_description(f'epsilon {round(agent.epsilon_decay,3)} reward {agent.aggr_ep_rewards["avg"][-1]} durata {durata}')
 
 plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['avg'], label='avg')
 plt.plot(agent.aggr_ep_rewards['ep'], agent.aggr_ep_rewards['min'], label='min')

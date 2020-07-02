@@ -2,7 +2,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 from AJ_lib_battle_environment import env
-from AJ_lib_agent import Agent
+from AJ_lib_agent import Agent_DQN
 
 
 # ███████ ███████ ███    ██ ███████ ██ ██████  ██      ███████     ██████   █████  ██████   █████  ███    ███ ███████ ████████ ███████ ██████  ███████
@@ -41,12 +41,12 @@ min_epsilon = 0.05
 # ██  ██  ██ ██   ██ ██ ██  ██ ██
 # ██      ██ ██   ██ ██ ██   ████
 
-agent1 = Agent(action_space=3, observation_space=4, replay_memory_size=replay_memory_size, epsilon=epsilon,
+agent1 = Agent_DQN(action_space=3, observation_space=4, replay_memory_size=replay_memory_size, epsilon=epsilon,
                    min_epsilon=min_epsilon, epsilon_decay=epsilon_decay, discount=discount, sampling_memory=sampling_memory,
                    load_pre_trained_model=load_pre_trained_model)
 agent1.motion_recognition = True
 
-agent2 = Agent(action_space=3, observation_space=4, replay_memory_size=replay_memory_size, epsilon=epsilon,
+agent2 = Agent_DQN(action_space=3, observation_space=4, replay_memory_size=replay_memory_size, epsilon=epsilon,
                    min_epsilon=min_epsilon, epsilon_decay=epsilon_decay, discount=discount, sampling_memory=sampling_memory,
                    load_pre_trained_model=load_pre_trained_model)
 agent2.motion_recognition = True

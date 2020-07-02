@@ -88,7 +88,7 @@ class element:
 # ███████ ██   ████   ████   ██ ██   ██  ██████  ██   ████ ██      ██ ███████ ██   ████    ██
 
 
-class env:
+class env_lizard:
 
     def __init__(self):
         self.size = 500
