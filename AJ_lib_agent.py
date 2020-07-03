@@ -109,6 +109,7 @@ class Agent_DQN:
     def DDQN_train(self, episode, how_aften_train, how_aften_replace_target):
         '''
         Doubel Deep Q learning
+        have to be placed inside the match loop
         :param episode: number of the match is going on
         :param how_aften_train: how aften train the live model
         :param how_aften_replace_target: how aften update the target model
@@ -165,6 +166,7 @@ class Agent_DQN:
     def DQN_train(self, episode, how_aften_train):
         '''
         Deep Q learning
+        have to be placed inside the match loop
         :param episode: number of the match is going on
         :param how_aften_train: how aften train the live model
         '''
