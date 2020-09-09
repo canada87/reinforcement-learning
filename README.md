@@ -13,7 +13,7 @@ game_policy_gradient.py/game_policy_gradient_pro.py: use the policy gradient alg
 # Pong
 pong_battle.py is the main file to train 2 networks competing one against the other playing pong
 
-#Library
+# Library
 AJ_lib_enviroment_lizard.py is the class of the environment of the hide and seek game
 
 AJ_lib_enviroment_pong.py is the class of the environment of the pong game
