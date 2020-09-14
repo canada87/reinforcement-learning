@@ -1,8 +1,8 @@
 # reinforcement-learning
 Here you can find script with the home made environment and classes to play "hide and seek" and "pong" with several reinforcement learning algorithms
 
-# Hide and seek
-game_actor_critic.py, game_ddqn.py, game_policy_gradient.py, game_policy_gradient_pro.py, are the main files to train a network to play at hide and seek with different types algorithms.
+# Hide and seek/pong
+game_actor_critic.py, game_ddqn.py, game_policy_gradient.py, game_policy_gradient_pro.py, are the main files to train a network to play at hide and seek or pong with different types algorithms.
 
 game_actor_critic.py: use the actor critic algorithm
 
